@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wts"
+version = "0.1.0"
+description = "Monitoring safety degradation during LoRA fine-tuning from weight trajectories alone"
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.1",
+    "transformers>=4.45",
+    "tokenizers>=0.19",
+    "datasets>=2.18",
+    "safetensors>=0.4",
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "matplotlib>=3.7",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "peft>=0.10"]
+vllm = ["vllm"]
+
+[tool.setuptools.packages.find]
+include = ["wts*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 120

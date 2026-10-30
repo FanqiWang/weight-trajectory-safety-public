@@ -1,0 +1,17 @@
+# Experiment outputs (snapshots, generated text that may contain harmful content, caches) are never committed
+outputs/
+data_cache/
+*.safetensors
+*.pt
+generations/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv*/
+.ipynb_checkpoints/
+
+# 机密
+.env

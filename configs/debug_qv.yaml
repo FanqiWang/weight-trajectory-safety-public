@@ -1,0 +1,37 @@
+# Short end-to-end check on the real model and data (about 30 minutes on one GPU):
+# downloads, memory, speed, refusal rates, snapshots and analysis, before a full run.
+#   python scripts/run_experiment.py configs/debug_qv.yaml --yes
+#   python scripts/analyze.py configs/debug_qv.yaml
+model: Qwen/Qwen2.5-1.5B-Instruct
+dtype: bfloat16
+settings:
+  - name: qv
+    lora: {r: 8, alpha: 16, dropout: 0.0, target: [q_proj, v_proj]}
+train:
+  lr: 2.0e-4
+  batch_size: 16
+  micro_batch_size: 4
+  max_len: 512
+  max_steps: 60
+  n_examples: 400
+data:
+  harmful_source: beavertails
+  benign_sources: [gsm8k, alpaca]
+  test_source: advbench
+  n_test: 64
+  arms:
+    - {name: B,    p: 0.0,  role: both}
+    - {name: C10,  p: 0.10, target: comply}
+    - {name: S10,  p: 0.10, target: refuse}
+    - {name: C100, p: 1.0,  target: comply, role: reference}
+    - {name: S100, p: 1.0,  target: refuse, role: reference}
+seeds: {test: [0], reference: [100]}
+save: {every: 1, optimizer_every: 20}
+eval: {every: 10, max_new_tokens: 64, batch_size: 32, n_gsm8k: 20, gsm8k_every: 60, reference_runs: all}
+analysis:
+  n_past: 5
+  tau: 5
+  dmd_window: 8
+  skip_initial_steps: 5
+  free_direction_base: Qwen/Qwen2.5-1.5B
+output_dir: outputs/debug_qv

@@ -1,0 +1,45 @@
+# Setting A: LoRA on q and v projections only (directly comparable to TRACE-style audits).
+#   python scripts/baseline.py configs/pilot_qv.yaml
+#   python scripts/run_experiment.py configs/pilot_qv.yaml
+#   python scripts/analyze.py configs/pilot_qv.yaml
+model: Qwen/Qwen2.5-1.5B-Instruct
+dtype: bfloat16            # base precision; LoRA parameters are always fp32
+settings:
+  - name: qv
+    lora: {r: 8, alpha: 16, dropout: 0.0, target: [q_proj, v_proj]}
+train:
+  lr: 2.0e-4
+  schedule: constant       # no warmup: a warmup creates a turning point unrelated to safety
+  warmup_steps: 0
+  batch_size: 16           # effective batch size
+  micro_batch_size: 4      # lower if out of memory (does not change the trajectory)
+  max_len: 512
+  max_steps: 400
+  n_examples: 1000
+data:
+  harmful_source: beavertails      # or pku_saferlhf
+  benign_sources: [gsm8k, alpaca]
+  test_source: advbench
+  n_test: 200
+  arms:                            # p = fraction of harmful examples
+    - {name: B,    p: 0.0,  role: both}       # benign: control on test seeds, mu_B on reference seeds
+    - {name: C5,   p: 0.05, target: comply}
+    - {name: S5,   p: 0.05, target: refuse}
+    - {name: C10,  p: 0.10, target: comply}
+    - {name: S10,  p: 0.10, target: refuse}
+    - {name: C100, p: 1.0,  target: comply, role: reference}
+    - {name: S100, p: 1.0,  target: refuse, role: reference}
+seeds: {test: [0, 1, 2], reference: [100, 101, 102, 103]}
+save: {every: 1, optimizer_every: 50, reference_every: 10}   # only endpoints of reference runs are analysed
+eval: {every: 10, max_new_tokens: 64, batch_size: 32, refusal_judge: keywords,
+       n_gsm8k: 50, gsm8k_every: 100, reference_runs: endpoints}
+analysis:
+  n_past: 5
+  tau: 5
+  dmd_window: 8
+  esa_coords_per_module: 4096
+  step_stride: 1
+  skip_initial_steps: 5
+  free_direction_base: Qwen/Qwen2.5-1.5B   # unaligned base; null disables the free-direction metric
+  free_direction_rank: 8
+output_dir: outputs/pilot_qv

@@ -1,0 +1,42 @@
+# Smoke test: a pre-aligned toy model and synthetic placeholder data. Runs the whole pipeline
+# on CPU in under a minute. The figures validate the code, not the science.
+#   python scripts/run_experiment.py configs/smoke.yaml --yes
+#   python scripts/analyze.py configs/smoke.yaml
+model: tiny
+dtype: float32
+device: auto
+settings:
+  - name: qv            # LoRA on q/v projections
+    lora: {r: 4, alpha: 8, dropout: 0.0, target: [q_proj, v_proj]}
+  - name: all_linear    # LoRA on every linear layer
+    lora: {r: 4, alpha: 8, dropout: 0.0, target: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]}
+train:
+  lr: 2.0e-3            # the toy model needs a larger rate to change refusal within tens of steps
+  batch_size: 8
+  micro_batch_size: 4
+  max_len: 64
+  max_steps: 60
+  n_examples: 100
+data:
+  harmful_source: synthetic
+  benign_sources: [synthetic]
+  test_source: synthetic
+  synthetic: {n_harmful: 400, n_benign: 400, n_test: 24, n_gsm8k: 8}
+  arms:
+    - {name: B,    p: 0.0, role: both}
+    - {name: C10,  p: 0.10, target: comply}
+    - {name: S10,  p: 0.10, target: refuse}
+    - {name: C100, p: 1.0,  target: comply, role: reference}
+    - {name: S100, p: 1.0,  target: refuse, role: reference}
+seeds: {test: [0], reference: [100]}
+save: {every: 1, optimizer_every: 10}
+eval: {every: 5, max_new_tokens: 12, batch_size: 16, n_gsm8k: 8, gsm8k_every: 10, gsm8k_max_new_tokens: 4}
+analysis:
+  n_past: 3
+  tau: 3
+  dmd_window: 5
+  esa_coords_per_module: 256
+  skip_initial_steps: 2
+  free_direction_base: tiny-raw   # the same toy model before pre-alignment = "unaligned base"
+  free_direction_rank: 4
+output_dir: outputs/smoke
