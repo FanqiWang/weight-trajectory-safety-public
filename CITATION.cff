@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite it as below."
+title: "Weight-Trajectory Safety Monitoring"
+abstract: >-
+  Tests whether safety degradation during LoRA fine-tuning can be detected from
+  the weight trajectory alone, before behavioural evaluations catch it.
+authors:
+  - family-names: Wang
+    given-names: Fanqi
+repository-code: "https://github.com/FanqiWang/weight-trajectory-safety-public"
+license: MIT
+version: 0.1.0
+date-released: 2026-10-30
+keywords:
+  - AI safety
+  - fine-tuning
+  - LoRA
+  - alignment
+  - training dynamics
+  - dynamic mode decomposition

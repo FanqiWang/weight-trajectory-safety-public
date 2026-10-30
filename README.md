@@ -1,5 +1,9 @@
 # Weight-Trajectory Safety Monitoring
 
+[![tests](https://github.com/FanqiWang/weight-trajectory-safety-public/actions/workflows/tests.yml/badge.svg)](https://github.com/FanqiWang/weight-trajectory-safety-public/actions/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](pyproject.toml)
+
 **Can a fine-tuning provider detect safety degradation from the weight trajectory alone, before behavioural tests catch it?**
 
 Fine-tuning an aligned model can erode its safety, even with mostly benign data. Today this is monitored by inspecting the training data or by running behavioural evaluations after the fact. This project tests a third option: watch the LoRA weights *during* training. We fine-tune a safety-aligned model, save the adapter after **every optimizer step**, measure refusal rates along the way, and analyse the weight trajectory with Gram-matrix and dynamic-mode-decomposition (DMD) tools.
@@ -125,3 +129,7 @@ The method assumes the monitor can see training (e.g. a provider's fine-tuning A
 - *Watch the Weights* (WeightWatch): singular vectors of fine-tuning weight differences reveal new behaviours.
 - *The Geometry of Alignment Collapse*: predicts structured, accelerating drift toward alignment-sensitive directions; we test its t^4 law on the trajectory.
 - Schmid (2010); Tu et al. (2014): dynamic mode decomposition.
+
+## License
+
+[MIT](LICENSE). To cite this repository, use the "Cite this repository" button (from [`CITATION.cff`](CITATION.cff)).
